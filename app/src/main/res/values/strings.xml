@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">SimpleCalculator</string>
+    <string name="pos_neg">\u00B1</string>
+    <string name="std_err">Sorry you can\'t do that</string>
+    <string name="add">+</string>
+    <string name="sub">\u2212</string>
+    <string name="div">/</string>
+    <string name="mult">x</string>
+    <string name="tip">Long Press Del to clear the display</string>
+    <string name="size_err">Max input length of 13 reached. Resetting view.</string>
+    <string name="percent">%</string>
+    <string name="clear">C</string>
+    <string name="equal">=</string>
+    <string name="delete">Del</string>
+    <string name="one">1</string>
+    <string name="two">2</string>
+    <string name="three">3</string>
+    <string name="four">4</string>
+    <string name="five">5</string>
+    <string name="six">6</string>
+    <string name="seven">7</string>
+    <string name="eight">8</string>
+    <string name="nine">9</string>
+    <string name="dec">.</string>
+    <string name="zero">0</string>
+
+</resources>
