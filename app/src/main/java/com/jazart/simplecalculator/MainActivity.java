@@ -1,10 +1,9 @@
 package com.jazart.simplecalculator;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.ActionMode;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
@@ -149,12 +148,29 @@ public class MainActivity extends AppCompatActivity implements MainMVP.MainViewO
         v = (Button) v;
         v.startAnimation(buttonAnim);
         vibe.vibrate(10);
-        mMainPresenter.showUserInputOnDigitClick((Button) v, mResultView);
+        mMainPresenter.showUserInputOnDigitClick(((Button) v).getText().toString(), v.getId());
     }
+
+
 
     @Override
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
         bundle.putString("EXTRA_TEXT", mResultView.getText().toString());
+    }
+
+    @Override
+    public void appendVal(String val) {
+        mResultView.append(val);
+    }
+
+    @Override
+    public String getText() {
+        return mResultView.getText().toString();
+    }
+
+    @Override
+    public int getLen() {
+        return mResultView.length();
     }
 }

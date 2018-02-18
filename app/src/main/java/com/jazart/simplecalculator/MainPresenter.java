@@ -1,8 +1,7 @@
 package com.jazart.simplecalculator;
 
 import android.util.Log;
-import android.widget.Button;
-import android.widget.TextView;
+
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.util.EmptyStackException;
@@ -27,17 +26,17 @@ public class MainPresenter implements MainMVP.PresenterOps {
 
     }
 
-    private void onDecimal(TextView textView, Button button) {
+    private void onDecimal(String buttonText) {
         if(mCalc.isValidDecimal()) {
             mCalc.updateDecimal(false);
-            textView.append(button.getText().toString());
+            mView.appendVal(buttonText);
         }
     }
 
-    private void onClearOrDel(TextView textView, Button button) {
-        if (textView.length() > 0 && button.getId() == R.id.del_button) {
-            String newVal = textView.getText().toString().substring(0, textView.getText().length() - 1);
-            textView.setText(newVal);
+    private void onClearOrDel(int buttonID) {
+        if (mView.getLen() > 0 && buttonID == R.id.del_button) {
+            String newVal = mView.getText().substring(0, mView.getText().length() - 1);
+            mView.showOperationResult(newVal);
         } else {
             clearAndReset();
         }
@@ -46,9 +45,9 @@ public class MainPresenter implements MainMVP.PresenterOps {
     //on equal checks to see if the calculator is in the listening state or calculating state
     //Listening state means it is waiting for an operator and another value.
     //calculating state means the calculator only needs another number then it will perform an operation.
-    private void onEqual(TextView textView) {
+    private void onEqual() {
         mCalc.updateState(false);
-        String viewText = textView.getText().toString();
+        String viewText = mView.getText();
         double newNum;
         try {
             newNum = parseTextView(viewText, mCalc.peekOp());
@@ -75,20 +74,21 @@ public class MainPresenter implements MainMVP.PresenterOps {
     //works similarly to onEqual except with more error checks for invalid inputs and operations
     //Also checks the state, if it's in the listening state then the operator will be displayed on the screen
     //on the calculating state the calculator will perform the pending operation then display the operator
-    private void onOperator(TextView textView, Button button) {
-        if(textView.length() < 1) {
+    private void onOperator(String buttonText) {
+        String empty = "";
+        if(mView.getLen() < 1) {
             mView.showErrorToast(R.string.std_err);
             return;
         }
 
         try {
             if (!mCalc.getState()) {
-                mCalc.addOp(button.getText().toString());
-                double valOne = Double.parseDouble(textView.getText().toString());
+                mCalc.addOp(buttonText);
+                double valOne = Double.parseDouble(mView.getText());
 
                 mCalc.updateState(true);
                 mCalc.addValToQueue(valOne);
-                textView.append(button.getText().toString());
+                mView.appendVal(buttonText);
                 mCalc.updateDecimal(true);
             }
         } catch (NumberFormatException e) {
@@ -97,7 +97,7 @@ public class MainPresenter implements MainMVP.PresenterOps {
         if(mCalc.getState()){
             double valTwo = 0;
             try {
-                valTwo = parseTextView(textView.getText().toString(), mCalc.peekOp());
+                valTwo = parseTextView(mView.getText(), mCalc.peekOp());
             } catch(NumberFormatException e) {
                 e.printStackTrace();
                 return;
@@ -107,56 +107,57 @@ public class MainPresenter implements MainMVP.PresenterOps {
             }
             mCalc.addValToQueue(valTwo);
             double result = mCalc.performOperation();
-            mCalc.addOp(button.getText().toString());
+            mCalc.addOp(buttonText);
 
-            mView.showOperationResult(String.valueOf(result) + "" + button.getText().toString());
+            mView.showOperationResult(String.valueOf(result) + "" + buttonText);
         }
     }
 
-    private boolean checkDisplayLen(TextView textView) {
-        return textView.length() > Calculator.sMAX_DIGITS;
+    private boolean checkDisplayLen(int textViewLen) {
+        return textViewLen > Calculator.sMAX_DIGITS;
     }
 
     // TODO: 2/17/2018 allow second value to be negative
-    private void onPlusMinus(TextView textView) {
-        if(!mCalc.getState() && !textView.getText().toString().contains("-")) {
-            CharSequence currentText = textView.getText();
-            textView.setText("-" + currentText);
+    private void onPlusMinus() {
+        if(!mCalc.getState() && !mView.getText().contains("-")) {
+            String currentText = mView.getText();
+            mView.showOperationResult("-" + currentText);
         } else {
-            CharSequence currentText = textView.getText().toString().replace("-", "");
-            textView.setText(currentText);
+            String currentText = mView.getText().replace("-", "");
+            mView.showOperationResult(currentText);
         }
     }
 
     @Override
-    public void showUserInputOnDigitClick(Button button, TextView textView) {
-        if(checkDisplayLen(textView)) {
+    public void showUserInputOnDigitClick(String buttonText, int buttonId) {
+
+        if(checkDisplayLen(mView.getLen())) {
             mView.showErrorToast(R.string.size_err);
             clearAndReset();
             return;
         }
 
-        if (isNumeric(button)) {
-            textView.append(button.getText());
-        } else if(button.getId() == R.id.plus_minus_button) {
-            onPlusMinus(textView);
-        } else if(button.getId() == R.id.deci_button) {
-            onDecimal(textView, button);
-        } else if(button.getId() == R.id.del_button || button.getId() == R.id.clear_all_button) {
-            onClearOrDel(textView, button);
-        } else if(button.getId() == R.id.equal_button) {
-           onEqual(textView);
+        if (isNumeric(buttonText)) {
+            mView.appendVal(buttonText);
+        } else if(buttonId == R.id.plus_minus_button) {
+            onPlusMinus();
+        } else if(buttonId == R.id.deci_button) {
+            onDecimal(buttonText);
+        } else if(buttonId == R.id.del_button || buttonId == R.id.clear_all_button) {
+            onClearOrDel(buttonId);
+        } else if(buttonId == R.id.equal_button) {
+           onEqual();
         } else {
-            onOperator(textView, button);
+            onOperator(buttonText);
         }
     }
 
     //checks to see if a given is numeric or not.
-    private boolean isNumeric(Button button) {
+    private boolean isNumeric(String buttonText) {
         NumberFormat formatter = NumberFormat.getInstance();
         ParsePosition position = new ParsePosition(0);
-        formatter.parse((String)button.getText(),position);
-        return button.getText().length() == position.getIndex();
+        formatter.parse(buttonText, position);
+        return buttonText.length() == position.getIndex();
     }
 
     private double parseTextView(String text, String opSymbol) {

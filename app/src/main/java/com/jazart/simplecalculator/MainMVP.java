@@ -1,8 +1,5 @@
 package com.jazart.simplecalculator;
 
-import android.widget.Button;
-import android.widget.TextView;
-
 /**
  * Created by jazart on 2/1/2018.
  */
@@ -13,13 +10,15 @@ public interface MainMVP {
         void showOperationResult(String result);
 
         void showErrorToast(int msgId);
-
+        void appendVal(String val);
+        String getText();
+        int getLen();
     }
 
 
     interface PresenterOps {
 
-        void showUserInputOnDigitClick(Button button, TextView textView);
+        void showUserInputOnDigitClick(String buttonText, int buttonId);
 
     }
 
